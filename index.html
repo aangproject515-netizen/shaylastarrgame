@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Shayla & Shelly: Chibi Fashion Battle RPG</title>
+  <style>
+    :root {
+      --pink-pastel: #ffd6e8;
+      --pink-hot: #ff4d94;
+      --purple-soft: #e5d4ff;
+      --purple-dark: #5a2a82;
+      --mint-soft: #d4fff0;
+      --yellow-soft: #fff5cc;
+      --card-bg: rgba(255, 255, 255, 0.92);
+    }
+    * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body {
+      margin: 0; padding: 0;
+      background: linear-gradient(135deg, #ffd6e8 0%, #e5d4ff 50%, #fff5cc 100%);
+      color: #3d2352; min-height: 100vh;
+    }
+    header {
+      background: rgba(255,255,255,0.85); backdrop-filter: blur(8px);
+      padding: 12px 20px; display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 3px solid var(--pink-hot); position: sticky; top: 0; z-index: 10;
+    }
+    .brand { font-size: 1.3rem; font-weight: 800; color: var(--pink-hot); }
+    .stats-bar { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; font-weight: 700; }
+    .badge {
+      background: var(--purple-soft); padding: 6px 12px; border-radius: 20px;
+      border: 2px solid var(--purple-dark); font-size: 0.9rem;
+    }
+    .container { max-width: 1050px; margin: 20px auto; padding: 0 15px; }
+    .tabs { display: flex; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; }
+    .tab-btn {
+      padding: 10px 18px; border: none; border-radius: 12px; cursor: pointer;
+      font-weight: 700; background: white; color: var(--purple-dark);
+      box-shadow: 0 4px 6px rgba(0,0,0,0.08); transition: 0.2s;
+    }
+    .tab-btn.active, .tab-btn:hover { background: var(--pink-hot); color: white; transform: translateY(-2px); }
+    .panel { display: none; background: var(--card-bg); padding: 20px; border-radius: 20px; box-shadow: 0 8px 20px rgba(90,42,130,0.12); }
+    .panel.active { display: block; }
+
+    /* Arena Battle */
+    .battle-arena {
+      display: grid; grid-template-columns: 1fr 120px 1fr; align-items: center;
+      gap: 15px; background: linear-gradient(180deg, #3a1c54 0%, #6e3584 60%, #b565a7 100%);
+      color: white; padding: 25px; border-radius: 18px; text-align: center; position: relative;
+    }
+    .fighter-card {
+      background: rgba(255,255,255,0.12); padding: 15px; border-radius: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+    }
+    .fighter-img {
+      width: 165px; height: 220px; object-fit: cover; border-radius: 14px;
+      border: 3px solid #fff; box-shadow: 0 0 15px rgba(255, 215, 0, 0.7);
+      background: #2b123f;
+    }
+    .hp-bar-wrap {
+      width: 100%; background: rgba(0,0,0,0.5); height: 18px; border-radius: 10px;
+      margin: 10px 0; overflow: hidden; border: 1px solid #fff;
+    }
+    .hp-bar { height: 100%; background: linear-gradient(90deg, #00e676, #69f0ae); width: 100%; transition: width 0.3s; }
+    .enemy-hp { background: linear-gradient(90deg, #ff1744, #ff616f); }
+
+    .battle-controls {
+      margin-top: 18px; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;
+    }
+    .btn-action {
+      padding: 12px 20px; border: none; border-radius: 12px; font-weight: 800;
+      cursor: pointer; font-size: 0.95rem; transition: 0.2s; color: white;
+    }
+    .btn-atk { background: #ff4081; }
+    .btn-skill { background: #7c4dff; }
+    .btn-heal { background: #00bfa5; }
+    .btn-cloud { background: #ff9100; }
+    .btn-action:disabled { opacity: 0.5; cursor: not-allowed; }
+    .battle-log {
+      margin-top: 15px; background: #231130; color: #ffe6f2; padding: 12px;
+      border-radius: 12px; height: 120px; overflow-y: auto; font-size: 0.9rem;
+    }
+
+    /* Grid Skin Karakter */
+    .skin-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 16px;
+    }
+    .skin-card {
+      background: white; border-radius: 16px; padding: 12px; text-align: center;
+      border: 3px solid #eee; transition: 0.2s; position: relative;
+    }
+    .skin-card.equipped { border-color: var(--pink-hot); background: #fff0f6; }
+    .skin-card.locked { filter: grayscale(0.85); opacity: 0.75; }
+    .skin-card img { width: 100%; height: 220px; object-fit: cover; border-radius: 12px; }
+    .role-tag {
+      display: inline-block; padding: 3px 10px; border-radius: 10px; font-size: 0.75rem;
+      font-weight: 700; background: var(--purple-soft); color: var(--purple-dark); margin: 6px 0;
+    }
+
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { padding: 10px; border-bottom: 1px solid #ddd; text-align: left; }
+    th { background: var(--pink-pastel); }
+
+    @media (max-width: 700px) {
+      .battle-arena { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="brand">✨ Shayla & Shelly: Fashion Battle RPG</div>
+  <div class="stats-bar">
+    <span class="badge" id="ui-user">👤 Guest</span>
+    <span class="badge" id="ui-lv">⭐ Lv. 1</span>
+    <span class="badge" id="ui-gems">💎 200 Gems</span>
+    <span class="badge" id="ui-stage">🏰 Stage 1</span>
+    <button class="btn-action btn-cloud" onclick="saveToGoogleSheets()">☁️ Cloud Save</button>
+  </div>
+</header>
+
+<div class="container">
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('battle', this)">⚔️ Battle Stage</button>
+    <button class="tab-btn" onclick="switchTab('wardrobe', this)">👗 Wardrobe & Party (9 Chibi)</button>
+    <button class="tab-btn" onclick="switchTab('gacha', this)">🎰 Gacha Runway (100 💎)</button>
+    <button class="tab-btn" onclick="switchTab('cloud', this)">🏆 Google Sheets & Ranking</button>
+  </div>
+
+  <!-- TAB 1: BATTLE -->
+  <div id="tab-battle" class="panel active">
+    <div class="battle-arena">
+      <!-- Pemain -->
+      <div class="fighter-card">
+        <h3 id="p-name">Shayla (Mosaic Gown)</h3>
+        <img id="p-img" class="fighter-img" src="shayla_mosaic.jpg" alt="Hero"/>
+        <div class="hp-bar-wrap"><div id="p-hp-bar" class="hp-bar"></div></div>
+        <div id="p-hp-text">HP: 500 / 500</div>
+        <small id="p-skill-desc">Skill: Golden Mosaic Shield</small>
+      </div>
+
+      <!-- VS -->
+      <div>
+        <h1 style="margin:0; font-size:2.4rem; color:#ffd54f;">VS</h1>
+        <p id="stage-label" style="font-weight:bold;">STAGE 1</p>
+      </div>
+
+      <!-- Musuh -->
+      <div class="fighter-card">
+        <h3 id="e-name">Shadow Fashion Critic</h3>
+        <div style="font-size:5.5rem; line-height:220px;" id="e-avatar">👾</div>
+        <div class="hp-bar-wrap"><div id="e-hp-bar" class="hp-bar enemy-hp"></div></div>
+        <div id="e-hp-text">HP: 450 / 450</div>
+        <small id="e-desc">Monster pengacau panggung runway!</small>
+      </div>
+    </div>
+
+    <div class="battle-controls">
+      <button class="btn-action btn-atk" id="btn-atk" onclick="playerAction('attack')">🗡️ Glam Strike (Basic)</button>
+      <button class="btn-action btn-skill" id="btn-skill" onclick="playerAction('skill')">✨ Signature Skill (CD: <span id="cd-skill">0</span>)</button>
+      <button class="btn-action btn-heal" id="btn-heal" onclick="playerAction('heal')">💖 Touch-Up Heal (CD: <span id="cd-heal">0</span>)</button>
+    </div>
+
+    <div class="battle-log" id="battle-log">
+      <div>🎀 Selamat datang di panggung pertarungan! Pilih aksimu untuk mengalahkan musuh.</div>
+    </div>
+  </div>
+
+  <!-- TAB 2: WARDROBE -->
+  <div id="tab-wardrobe" class="panel">
+    <h2>👗 Koleksi Karakter & Skin Chibi (Shayla & Shelly)</h2>
+    <p>Setiap kostum memberikan statistik HP, Attack, dan *Elemental Skill* yang berbeda di dalam pertarungan.</p>
+    <div class="skin-grid" id="skin-grid"></div>
+  </div>
+
+  <!-- TAB 3: GACHA -->
+  <div id="tab-gacha" class="panel" style="text-align:center;">
+    <h2>🎰 Runway Starlight Gacha</h2>
+    <p>Gunakan <b>100 Pink Gems 💎</b> untuk memanggil kostum Chibi baru bagi Shayla atau membuka sang adik, Shelly!</p>
+    <button class="btn-action btn-skill" style="font-size:1.2rem; padding:15px 30px;" onclick="pullGacha()">✨ Summon 1x (100 💎)</button>
+    <div id="gacha-result" style="margin-top:25px;"></div>
+  </div>
+
+  <!-- TAB 4: GOOGLE SHEETS & LEADERBOARD -->
+  <div id="tab-cloud" class="panel">
+    <h2>☁️ Koneksi Database Google Sheets</h2>
+    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px;">
+      <input type="text" id="input-username" placeholder="Masukkan Username kamu..." style="padding:10px; border-radius:10px; border:2px solid #ccc; flex:1;" />
+      <button class="btn-action btn-heal" onclick="loadFromGoogleSheets()">📥 Load Data dari Sheet</button>
+      <button class="btn-action btn-cloud" onclick="saveToGoogleSheets()">📤 Save Data ke Sheet</button>
+      <button class="btn-action btn-skill" onclick="fetchLeaderboard()">🔄 Refresh Leaderboard</button>
+    </div>
+    <p id="cloud-status" style="font-weight:bold; color:var(--purple-dark);"></p>
+
+    <h3>🏆 Top 10 Fashion Fighters (Google Sheets Leaderboard)</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Rank</th>
+          <th>Username</th>
+          <th>Max Stage</th>
+          <th>Total Power</th>
+        </tr>
+      </thead>
+      <tbody id="leaderboard-body">
+        <tr><td colspan="4">Klik "Refresh Leaderboard" untuk memuat data dari Google Sheets.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  // =========================================================================
+  // 1. MASUKKAN URL WEB APP GOOGLE APPS SCRIPT KAMU DI BAWAH INI
+  // =========================================================================
+  const GAS_URL = "https://script.google.com/macros/s/AKfycbzUCTjhIUp3WrObvszStoLSDPbk-FzBvaPhYv-szF94suu2GpCxqcm8CcPgOAMRSTMl/exec";
+
+  // =========================================================================
+  // 2. DATABASE 9 KARAKTER / SKIN CHIBI SHAYLA & SHELLY
+  // =========================================================================
+  const SKINS_DB = [
+    {
+      id: "shayla_mosaic",
+      name: "Shayla - Mosaic Empress",
+      char: "Shayla",
+      img: "shayla_mosaic.jpg",
+      role: "Light Tank / Buffer",
+      hp: 550, atk: 65,
+      skillName: "Prism Mosaic Nova",
+      skillMult: 2.1,
+      bonusHeal: 120
+    },
+    {
+      id: "shayla_gold",
+      name: "Shayla - Golden Chain Goddess",
+      char: "Shayla",
+      img: "shayla_gold.jpg",
+      role: "Golden Bruiser",
+      hp: 520, atk: 80,
+      skillName: "Golden Chain Bind",
+      skillMult: 2.4,
+      bonusHeal: 90
+    },
+    {
+      id: "shayla_yellow",
+      name: "Shayla - Sunburst Corset",
+      char: "Shayla",
+      img: "shayla_yellow.jpg",
+      role: "Solar Striker",
+      hp: 480, atk: 90,
+      skillName: "Sunbeam Ribbon Slash",
+      skillMult: 2.5,
+      bonusHeal: 85
+    },
+    {
+      id: "shayla_ocean",
+      name: "Shayla - Ocean Pearl Siren",
+      char: "Shayla",
+      img: "shayla_ocean.jpg",
+      role: "Hydro Healer",
+      hp: 620, atk: 70,
+      skillName: "Tidal Pearl Blessing",
+      skillMult: 2.0,
+      bonusHeal: 220
+    },
+    {
+      id: "shayla_pop",
+      name: "Shayla - Pink Fur Pop Diva",
+      char: "Shayla",
+      img: "shayla_pop.jpg",
+      role: "Sonic Charmer",
+      hp: 500, atk: 95,
+      skillName: "Pink Spotlight Encore",
+      skillMult: 2.6,
+      bonusHeal: 110
+    },
+    {
+      id: "shayla_biker",
+      name: "Shayla - Crimson Rebel Biker",
+      char: "Shayla",
+      img: "shayla_biker.jpg",
+      role: "Critical Assassin",
+      hp: 460, atk: 115,
+      skillName: "Crimson Leather Blitz",
+      skillMult: 2.9,
+      bonusHeal: 70
+    },
+    {
+      id: "shayla_galaxy",
+      name: "Shayla - Starlight Nebula",
+      char: "Shayla",
+      img: "shayla_galaxy.jpg",
+      role: "Cosmic Mage",
+      hp: 510, atk: 110,
+      skillName: "Nebula Sequins Meteor",
+      skillMult: 2.8,
+      bonusHeal: 100
+    },
+    {
+      id: "shayla_royal",
+      name: "Shayla - Sovereign Lace Queen",
+      char: "Shayla",
+      img: "shayla_royal.jpg",
+      role: "Royal Paladin",
+      hp: 680, atk: 105,
+      skillName: "Emerald Leaf Judgment",
+      skillMult: 2.7,
+      bonusHeal: 160
+    },
+    {
+      id: "shelly_purple",
+      name: "Shelly - Amethyst Night Princess",
+      char: "Shelly (Adik Shayla)",
+      img: "shelly_purple.jpg",
+      role: "Dark Archmage (SSR)",
+      hp: 640, atk: 130,
+      skillName: "Violet Ruffle Apocalypse",
+      skillMult: 3.2,
+      bonusHeal: 150
+    }
+  ];
+
+  // =========================================================================
+  // 3. STATE PEMAIN & PERTARUNGAN
+  // =========================================================================
+  let player = {
+    username: localStorage.getItem("rpg_username") || "Player1",
+    level: Number(localStorage.getItem("rpg_level")) || 1,
+    gems: Number(localStorage.getItem("rpg_gems")) || 200,
+    maxStage: Number(localStorage.getItem("rpg_stage")) || 1,
+    unlockedSkins: JSON.parse(localStorage.getItem("rpg_skins") || '["shayla_mosaic"]'),
+    equippedSkin: localStorage.getItem("rpg_equipped") || "shayla_mosaic"
+  };
+
+  let battle = {
+    pMaxHp: 500, pHp: 500,
+    eMaxHp: 450, eHp: 450, eAtk: 45,
+    cdSkill: 0, cdHeal: 0
+  };
+
+  const ENEMIES = [
+    { name: "Shadow Fashion Critic", icon: "👾" },
+    { name: "Glitch Runway Golem", icon: "🤖" },
+    { name: "Neon Envy Witch", icon: "🧙‍♀️" },
+    { name: "Dark Couture Dragon", icon: "🐉" }
+  ];
+
+  function initGame() {
+    document.getElementById("input-username").value = player.username;
+    updateHeaderUI();
+    renderWardrobe();
+    setupStage();
+  }
+
+  function saveLocal() {
+    localStorage.setItem("rpg_username", player.username);
+    localStorage.setItem("rpg_level", player.level);
+    localStorage.setItem("rpg_gems", player.gems);
+    localStorage.setItem("rpg_stage", player.maxStage);
+    localStorage.setItem("rpg_skins", JSON.stringify(player.unlockedSkins));
+    localStorage.setItem("rpg_equipped", player.equippedSkin);
+    updateHeaderUI();
+  }
+
+  function updateHeaderUI() {
+    document.getElementById("ui-user").innerText = `👤 ${player.username}`;
+    document.getElementById("ui-lv").innerText = `⭐ Lv. ${player.level}`;
+    document.getElementById("ui-gems").innerText = `💎 ${player.gems} Gems`;
+    document.getElementById("ui-stage").innerText = `🏰 Stage ${player.maxStage}`;
+  }
+
+  function getActiveSkin() {
+    return SKINS_DB.find(s => s.id === player.equippedSkin) || SKINS_DB[0];
+  }
+
+  function setupStage() {
+    const skin = getActiveSkin();
+    const lvBonus = (player.level - 1) * 25;
+    battle.pMaxHp = skin.hp + lvBonus;
+    battle.pHp = battle.pMaxHp;
+    battle.cdSkill = 0;
+    battle.cdHeal = 0;
+
+    const stg = player.maxStage;
+    const enemyInfo = ENEMIES[(stg - 1) % ENEMIES.length];
+    battle.eMaxHp = 350 + (stg * 140);
+    battle.eHp = battle.eMaxHp;
+    battle.eAtk = 35 + (stg * 14);
+
+    document.getElementById("p-name").innerText = skin.name;
+    document.getElementById("p-img").src = skin.img;
+    document.getElementById("p-skill-desc").innerText = `Skill: ${skin.skillName} (${skin.role})`;
+    document.getElementById("stage-label").innerText = `STAGE ${stg}`;
+    document.getElementById("e-name").innerText = `${enemyInfo.name} (Lv.${stg})`;
+    document.getElementById("e-avatar").innerText = enemyInfo.icon;
+
+    updateBattleBars();
+  }
+
+  function updateBattleBars() {
+    const pPct = Math.max(0, (battle.pHp / battle.pMaxHp) * 100);
+    const ePct = Math.max(0, (battle.eHp / battle.eMaxHp) * 100);
+    document.getElementById("p-hp-bar").style.width = pPct + "%";
+    document.getElementById("e-hp-bar").style.width = ePct + "%";
+    document.getElementById("p-hp-text").innerText = `HP: ${battle.pHp} / ${battle.pMaxHp}`;
+    document.getElementById("e-hp-text").innerText = `HP: ${battle.eHp} / ${battle.eMaxHp}`;
+    document.getElementById("cd-skill").innerText = battle.cdSkill;
+    document.getElementById("cd-heal").innerText = battle.cdHeal;
+    document.getElementById("btn-skill").disabled = battle.cdSkill > 0;
+    document.getElementById("btn-heal").disabled = battle.cdHeal > 0;
+  }
+
+  function logBattle(msg) {
+    const box = document.getElementById("battle-log");
+    box.innerHTML = `<div>${msg}</div>` + box.innerHTML;
+  }
+
+  function playerAction(type) {
+    const skin = getActiveSkin();
+    const baseAtk = skin.atk + (player.level * 8);
+
+    if (type === 'attack') {
+      const dmg = Math.floor(baseAtk * (0.9 + Math.random() * 0.2));
+      battle.eHp -= dmg;
+      logBattle(`🗡️ <b>${skin.name}</b> menyerang dengan Glam Strike sebesar <b>${dmg} DMG</b>!`);
+    } else if (type === 'skill' && battle.cdSkill === 0) {
+      const dmg = Math.floor(baseAtk * skin.skillMult);
+      battle.eHp -= dmg;
+      battle.cdSkill = 3;
+      logBattle(`✨ <b>${skin.skillName}!</b> Serangan memukau menghantam musuh sebesar <b>${dmg} DMG</b>!`);
+    } else if (type === 'heal' && battle.cdHeal === 0) {
+      const healAmt = skin.bonusHeal + (player.level * 15);
+      battle.pHp = Math.min(battle.pMaxHp, battle.pHp + healAmt);
+      battle.cdHeal = 3;
+      logBattle(`💖 <b>Touch-Up Heal!</b> Memulihkan <b>${healAmt} HP</b>.`);
+    }
+
+    if (battle.cdSkill > 0 && type !== 'skill') battle.cdSkill--;
+    if (battle.cdHeal > 0 && type !== 'heal') battle.cdHeal--;
+
+    if (battle.eHp <= 0) {
+      const rewardGems = 60 + (player.maxStage * 15);
+      player.gems += rewardGems;
+      player.level += 1;
+      player.maxStage += 1;
+      logBattle(`🎉 <b>MENANG!</b> Kamu naik ke Lv.${player.level} dan mendapat <b>+${rewardGems} Gems 💎</b>! Lanjut ke Stage ${player.maxStage}.`);
+      saveLocal();
+      setTimeout(setupStage, 800);
+      return;
+    }
+
+    // Giliran Musuh
+    const eDmg = Math.floor(battle.eAtk * (0.85 + Math.random() * 0.3));
+    battle.pHp -= eDmg;
+    logBattle(`👾 Musuh membalas serangan sebesar <b>${eDmg} DMG</b>!`);
+
+    if (battle.pHp <= 0) {
+      logBattle(`💫 Kamu kalah di Stage ${player.maxStage}... Darah dipulihkan kembali untuk mencoba lagi!`);
+      setupStage();
+      return;
+    }
+
+    updateBattleBars();
+  }
+
+  // =========================================================================
+  // 4. WARDROBE & GACHA SYSTEM
+  // =========================================================================
+  function renderWardrobe() {
+    const grid = document.getElementById("skin-grid");
+    grid.innerHTML = "";
+    SKINS_DB.forEach(s => {
+      const unlocked = player.unlockedSkins.includes(s.id);
+      const equipped = player.equippedSkin === s.id;
+      const card = document.createElement("div");
+      card.className = `skin-card ${unlocked ? '' : 'locked'} ${equipped ? 'equipped' : ''}`;
+      card.innerHTML = `
+        <img src="${s.img}" alt="${s.name}" />
+        <h4 style="margin:8px 0 4px;">${s.name}</h4>
+        <span class="role-tag">${s.role}</span>
+        <div style="font-size:0.85rem; margin-bottom:10px;">
+          ❤️ HP: ${s.hp} | ⚔️ ATK: ${s.atk}<br/>
+          ✨ <i>${s.skillName}</i>
+        </div>
+        ${unlocked
+          ? `<button class="btn-action ${equipped ? 'btn-heal' : 'btn-atk'}" style="width:100%;" onclick="equipSkin('${s.id}')">
+              ${equipped ? '✅ Sedang Dipakai' : '👗 Pakai Kostum'}
+             </button>`
+          : `<button class="btn-action" style="width:100%; background:#888;" disabled>🔒 Belum Terbuka (Gacha)</button>`
+        }
+      `;
+      grid.appendChild(card);
+    });
+  }
+
+  function equipSkin(skinId) {
+    player.equippedSkin = skinId;
+    saveLocal();
+    renderWardrobe();
+    setupStage();
+  }
+
+  function pullGacha() {
+    if (player.gems < 100) {
+      alert("Pink Gems kamu belum cukup! Menangkan Battle Stage untuk dapat Gems.");
+      return;
+    }
+    player.gems -= 100;
+    const picked = SKINS_DB[Math.floor(Math.random() * SKINS_DB.length)];
+    let msg = "";
+
+    if (!player.unlockedSkins.includes(picked.id)) {
+      player.unlockedSkins.push(picked.id);
+      msg = `🎉 <b>NEW CHARACTER/SKIN UNLOCKED!</b> Kamu mendapatkan <b>${picked.name}</b>!`;
+    } else {
+      player.level += 1;
+      msg = `✨ Kamu mendapat duplikat <b>${picked.name}</b>! Otomatis dikonversi menjadi <b>+1 Level Up (Lv.${player.level})</b>!`;
+    }
+
+    saveLocal();
+    renderWardrobe();
+    setupStage();
+
+    document.getElementById("gacha-result").innerHTML = `
+      <div style="background:white; display:inline-block; padding:20px; border-radius:18px; border:3px solid var(--pink-hot);">
+        <img src="${picked.img}" style="width:180px; height:240px; object-fit:cover; border-radius:12px;" />
+        <h3>${picked.name}</h3>
+        <p>${msg}</p>
+      </div>
+    `;
+  }
+
+  // =========================================================================
+  // 5. INTEGRASI GOOGLE SHEETS (SAVE, LOAD, LEADERBOARD)
+  // =========================================================================
+  function getTotalPower() {
+    return (player.level * 150) + (player.unlockedSkins.length * 300);
+  }
+
+  async function saveToGoogleSheets() {
+    const uname = document.getElementById("input-username").value.trim() || player.username;
+    player.username = uname;
+    saveLocal();
+
+    if (GAS_URL.includes("MASUKKAN_URL")) {
+      alert("Masukkan URL Web App Google Apps Script kamu dulu di variabel GAS_URL pada kode index.html!");
+      return;
+    }
+
+    const statusEl = document.getElementById("cloud-status");
+    statusEl.innerText = "⏳ Menyimpan progress ke Google Sheets...";
+
+    try {
+      const res = await fetch(GAS_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({
+          action: "savePlayer",
+          username: player.username,
+          level: player.level,
+          gems: player.gems,
+          maxStage: player.maxStage,
+          unlockedSkins: player.unlockedSkins,
+          totalPower: getTotalPower()
+        })
+      });
+      const data = await res.json();
+      statusEl.innerText = "✅ " + data.message;
+      fetchLeaderboard();
+    } catch (err) {
+      statusEl.innerText = "❌ Gagal menyimpan ke Google Sheets: " + err;
+    }
+  }
+
+  async function loadFromGoogleSheets() {
+    const uname = document.getElementById("input-username").value.trim();
+    if (!uname) return alert("Masukkan Username terlebih dahulu!");
+
+    const statusEl = document.getElementById("cloud-status");
+    statusEl.innerText = "⏳ Mengambil data dari Google Sheets...";
+
+    try {
+      const res = await fetch(`${GAS_URL}?action=loadPlayer&username=${encodeURIComponent(uname)}`);
+      const result = await res.json();
+      if (result.found) {
+        player.username = result.player.username;
+        player.level = result.player.level;
+        player.gems = result.player.gems;
+        player.maxStage = result.player.maxStage;
+        player.unlockedSkins = result.player.unlockedSkins;
+        saveLocal();
+        renderWardrobe();
+        setupStage();
+        statusEl.innerText = `✅ Data akun ${player.username} berhasil dimuat!`;
+      } else {
+        statusEl.innerText = "⚠️ Username belum ditemukan di Google Sheets. Silakan klik Save Data terlebih dahulu.";
+      }
+    } catch (err) {
+      statusEl.innerText = "❌ Gagal memuat data: " + err;
+    }
+  }
+
+  async function fetchLeaderboard() {
+    const tbody = document.getElementById("leaderboard-body");
+    tbody.innerHTML = `<tr><td colspan="4">⏳ Memuat Leaderboard dari Google Sheets...</td></tr>`;
+    try {
+      const res = await fetch(`${GAS_URL}?action=getLeaderboard`);
+      const result = await res.json();
+      if (result.data && result.data.length > 0) {
+        tbody.innerHTML = result.data.map((row, idx) => `
+          <tr>
+            <td><b>#${idx + 1}</b></td>
+            <td>${row.username}</td>
+            <td>Stage ${row.maxStage}</td>
+            <td>⚡ ${row.totalPower}</td>
+          </tr>
+        `).join("");
+      } else {
+        tbody.innerHTML = `<tr><td colspan="4">Belum ada data di Leaderboard.</td></tr>`;
+      }
+    } catch (err) {
+      tbody.innerHTML = `<tr><td colspan="4">Gagal mengambil Leaderboard. Pastikan GAS_URL sudah benar.</td></tr>`;
+    }
+  }
+
+  function switchTab(tabName, btn) {
+    document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+    document.getElementById("tab-" + tabName).classList.add("active");
+    btn.classList.add("active");
+  }
+
+  initGame();
+</script>
+</body>
+</html>

@@ -3,105 +3,239 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Shayla & Shelly: Chibi Fashion Battle RPG</title>
+  <title>Shayla & Shelly: Chibi Fashion Battle RPG v2.0</title>
   <style>
     :root {
       --pink-pastel: #ffd6e8;
-      --pink-hot: #ff4d94;
+      --pink-hot: #ff3385;
       --purple-soft: #e5d4ff;
-      --purple-dark: #5a2a82;
-      --mint-soft: #d4fff0;
-      --yellow-soft: #fff5cc;
-      --card-bg: rgba(255, 255, 255, 0.92);
+      --purple-dark: #4a1c6d;
+      --card-bg: rgba(255, 255, 255, 0.94);
     }
     * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
     body {
       margin: 0; padding: 0;
       background: linear-gradient(135deg, #ffd6e8 0%, #e5d4ff 50%, #fff5cc 100%);
-      color: #3d2352; min-height: 100vh;
+      color: #3d2352; min-height: 100vh; overflow-x: hidden;
     }
     header {
-      background: rgba(255,255,255,0.85); backdrop-filter: blur(8px);
+      background: rgba(255,255,255,0.9); backdrop-filter: blur(8px);
       padding: 12px 20px; display: flex; justify-content: space-between; align-items: center;
-      border-bottom: 3px solid var(--pink-hot); position: sticky; top: 0; z-index: 10;
+      border-bottom: 3px solid var(--pink-hot); position: sticky; top: 0; z-index: 50;
     }
-    .brand { font-size: 1.3rem; font-weight: 800; color: var(--pink-hot); }
-    .stats-bar { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; font-weight: 700; }
+    .brand { font-size: 1.3rem; font-weight: 900; color: var(--pink-hot); text-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+    .stats-bar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; font-weight: 700; }
     .badge {
       background: var(--purple-soft); padding: 6px 12px; border-radius: 20px;
-      border: 2px solid var(--purple-dark); font-size: 0.9rem;
+      border: 2px solid var(--purple-dark); font-size: 0.85rem;
     }
-    .container { max-width: 1050px; margin: 20px auto; padding: 0 15px; }
+    .container { max-width: 1080px; margin: 20px auto; padding: 0 15px; }
     .tabs { display: flex; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; }
     .tab-btn {
       padding: 10px 18px; border: none; border-radius: 12px; cursor: pointer;
-      font-weight: 700; background: white; color: var(--purple-dark);
+      font-weight: 800; background: white; color: var(--purple-dark);
       box-shadow: 0 4px 6px rgba(0,0,0,0.08); transition: 0.2s;
     }
     .tab-btn.active, .tab-btn:hover { background: var(--pink-hot); color: white; transform: translateY(-2px); }
-    .panel { display: none; background: var(--card-bg); padding: 20px; border-radius: 20px; box-shadow: 0 8px 20px rgba(90,42,130,0.12); }
+    .panel { display: none; background: var(--card-bg); padding: 20px; border-radius: 22px; box-shadow: 0 10px 25px rgba(90,42,130,0.15); }
     .panel.active { display: block; }
 
-    /* Arena Battle */
+    /* ================= ARENA & ANIMASI PERTARUNGAN ================= */
     .battle-arena {
-      display: grid; grid-template-columns: 1fr 120px 1fr; align-items: center;
-      gap: 15px; background: linear-gradient(180deg, #3a1c54 0%, #6e3584 60%, #b565a7 100%);
-      color: white; padding: 25px; border-radius: 18px; text-align: center; position: relative;
+      display: grid; grid-template-columns: 1fr 130px 1fr; align-items: center;
+      gap: 15px; background: radial-gradient(circle at center, #5e2a84 0%, #2a0f42 85%);
+      color: white; padding: 30px 25px; border-radius: 20px; text-align: center;
+      position: relative; overflow: hidden; border: 3px solid #f8bbd0;
+      box-shadow: inset 0 0 40px rgba(255, 77, 148, 0.35);
     }
+
+    /* Efek Guncangan Layar saat Ultimate / Skill Berat */
+    .screen-shake { animation: arenaShake 0.45s cubic-bezier(.36,.07,.19,.97) both; }
+    @keyframes arenaShake {
+      10%, 90% { transform: translate3d(-4px, 2px, 0); }
+      20%, 80% { transform: translate3d(6px, -4px, 0); }
+      30%, 50%, 70% { transform: translate3d(-8px, 4px, 0); }
+      40%, 60% { transform: translate3d(8px, -2px, 0); }
+    }
+
     .fighter-card {
-      background: rgba(255,255,255,0.12); padding: 15px; border-radius: 16px;
-      border: 2px solid rgba(255,255,255,0.3);
+      background: rgba(255,255,255,0.1); padding: 16px; border-radius: 18px;
+      border: 2px solid rgba(255,255,255,0.28); position: relative; z-index: 2;
+      backdrop-filter: blur(4px);
     }
+
+    /* Animasi Bernafas / Melayang (Idle) */
+    .sprite-wrap {
+      position: relative; display: inline-block; margin: 8px 0;
+      animation: floatIdle 2.6s ease-in-out infinite;
+    }
+    .enemy-wrap { animation: floatEnemy 2.2s ease-in-out infinite; }
+
+    @keyframes floatIdle {
+      0%, 100% { transform: translateY(0px) scale(1); }
+      50% { transform: translateY(-10px) scale(1.03); }
+    }
+    @keyframes floatEnemy {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-12px) rotate(4deg); }
+    }
+
+    /* Animasi Menerjang & Terkena Serangan */
+    .anim-dash-right { animation: dashRight 0.5s ease-in-out !important; }
+    @keyframes dashRight {
+      0% { transform: translateX(0) scale(1); }
+      40% { transform: translateX(130px) scale(1.18) rotate(5deg); }
+      100% { transform: translateX(0) scale(1); }
+    }
+
+    .anim-dash-left { animation: dashLeft 0.5s ease-in-out !important; }
+    @keyframes dashLeft {
+      0% { transform: translateX(0) scale(1); }
+      40% { transform: translateX(-130px) scale(1.18) rotate(-5deg); }
+      100% { transform: translateX(0) scale(1); }
+    }
+
+    .anim-hit { animation: hitFlash 0.45s ease !important; }
+    @keyframes hitFlash {
+      0%, 100% { transform: translateX(0); filter: none; }
+      20%, 60% { transform: translateX(-14px) rotate(-6deg); filter: brightness(2) drop-shadow(0 0 18px #ff1744); }
+      40%, 80% { transform: translateX(14px) rotate(6deg); filter: hue-rotate(300deg); }
+    }
+
+    .anim-cast { animation: castPulse 0.65s ease-out !important; }
+    @keyframes castPulse {
+      0% { transform: scale(1); filter: brightness(1); }
+      50% { transform: scale(1.22) translateY(-12px); filter: brightness(1.5) drop-shadow(0 0 28px #fff); }
+      100% { transform: scale(1); filter: brightness(1); }
+    }
+
     .fighter-img {
-      width: 165px; height: 220px; object-fit: cover; border-radius: 14px;
-      border: 3px solid #fff; box-shadow: 0 0 15px rgba(255, 215, 0, 0.7);
-      background: #2b123f;
+      width: 175px; height: 235px; object-fit: cover; border-radius: 16px;
+      border: 3px solid #fff; background: #2b123f; transition: box-shadow 0.3s;
     }
+
+    /* Proyektil & Partikel Kekuatan */
+    .fx-layer {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none; z-index: 20; overflow: hidden;
+    }
+    .projectile {
+      position: absolute; font-size: 3.4rem; top: 42%; left: 22%;
+      transform: translate(-50%, -50%);
+      filter: drop-shadow(0 0 18px currentColor);
+      animation: shootToEnemy 0.55s cubic-bezier(0.2, 0.8, 0.4, 1) forwards;
+    }
+    @keyframes shootToEnemy {
+      0% { left: 24%; transform: translate(-50%, -50%) scale(0.5) rotate(0deg); opacity: 1; }
+      80% { left: 76%; transform: translate(-50%, -50%) scale(1.5) rotate(360deg); opacity: 1; }
+      100% { left: 78%; transform: translate(-50%, -50%) scale(2.2); opacity: 0; }
+    }
+
+    .enemy-projectile {
+      position: absolute; font-size: 3rem; top: 42%; left: 76%;
+      transform: translate(-50%, -50%);
+      animation: shootToHero 0.5s ease-in forwards;
+    }
+    @keyframes shootToHero {
+      0% { left: 75%; transform: scale(0.6); opacity: 1; }
+      85% { left: 25%; transform: scale(1.4); opacity: 1; }
+      100% { left: 23%; transform: scale(2); opacity: 0; }
+    }
+
+    .particle-burst {
+      position: absolute; font-size: 2rem; pointer-events: none;
+      animation: burstOut 0.75s ease-out forwards;
+    }
+    @keyframes burstOut {
+      0% { transform: translate(0, 0) scale(0.4); opacity: 1; }
+      100% { transform: translate(var(--tx), var(--ty)) scale(1.5) rotate(45deg); opacity: 0; }
+    }
+
+    /* Angka Damage Melayang (Floating Damage Popup) */
+    .dmg-popup {
+      position: absolute; font-weight: 900; font-size: 1.7rem;
+      text-shadow: 0 3px 6px rgba(0,0,0,0.85); pointer-events: none; z-index: 30;
+      animation: floatUpDmg 1s ease-out forwards;
+    }
+    @keyframes floatUpDmg {
+      0% { transform: translate(-50%, 0) scale(0.7); opacity: 1; }
+      30% { transform: translate(-50%, -25px) scale(1.25); opacity: 1; }
+      100% { transform: translate(-50%, -65px) scale(1); opacity: 0; }
+    }
+
+    /* Banner Cut-In saat Ultimate */
+    .ult-banner {
+      position: absolute; top: 35%; left: -100%; width: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 20, 147, 0.95), rgba(138, 43, 226, 0.95), transparent);
+      color: #fff; padding: 14px 0; font-size: 1.6rem; font-weight: 900;
+      letter-spacing: 2px; text-transform: uppercase; z-index: 40;
+      text-shadow: 0 2px 10px #000; border-top: 3px solid #ffd700; border-bottom: 3px solid #ffd700;
+      pointer-events: none;
+    }
+    .ult-banner.play { animation: slideBanner 1.3s ease-in-out forwards; }
+    @keyframes slideBanner {
+      0% { left: -100%; opacity: 0; }
+      20%, 80% { left: 0%; opacity: 1; }
+      100% { left: 100%; opacity: 0; }
+    }
+
+    /* Bar HP, Shield, dan Energi Ultimate */
     .hp-bar-wrap {
-      width: 100%; background: rgba(0,0,0,0.5); height: 18px; border-radius: 10px;
-      margin: 10px 0; overflow: hidden; border: 1px solid #fff;
+      width: 100%; background: rgba(0,0,0,0.55); height: 18px; border-radius: 10px;
+      margin: 8px 0 4px; overflow: hidden; border: 1px solid #fff; position: relative;
     }
     .hp-bar { height: 100%; background: linear-gradient(90deg, #00e676, #69f0ae); width: 100%; transition: width 0.3s; }
     .enemy-hp { background: linear-gradient(90deg, #ff1744, #ff616f); }
+    .ult-bar { height: 100%; background: linear-gradient(90deg, #ff9100, #ffff00); width: 0%; transition: width 0.3s; }
 
+    .status-badges { display: flex; justify-content: center; gap: 6px; min-height: 24px; margin-top: 4px; flex-wrap: wrap; }
+    .status-pill { font-size: 0.75rem; padding: 2px 8px; border-radius: 10px; background: rgba(0,0,0,0.6); border: 1px solid #ffd54f; }
+
+    /* Tombol Pertarungan */
     .battle-controls {
-      margin-top: 18px; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;
+      margin-top: 18px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;
     }
     .btn-action {
-      padding: 12px 20px; border: none; border-radius: 12px; font-weight: 800;
+      padding: 12px 18px; border: none; border-radius: 14px; font-weight: 800;
       cursor: pointer; font-size: 0.95rem; transition: 0.2s; color: white;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.18);
     }
-    .btn-atk { background: #ff4081; }
-    .btn-skill { background: #7c4dff; }
-    .btn-heal { background: #00bfa5; }
-    .btn-cloud { background: #ff9100; }
-    .btn-action:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-action:hover:not(:disabled) { transform: translateY(-3px) scale(1.03); }
+    .btn-atk { background: linear-gradient(135deg, #ff4081, #f50057); }
+    .btn-skill { background: linear-gradient(135deg, #7c4dff, #651fff); }
+    .btn-ult { background: linear-gradient(135deg, #ff6d00, #ffd600); color: #2b123f; text-shadow: 0 1px 0 rgba(255,255,255,0.5); }
+    .btn-heal { background: linear-gradient(135deg, #00bfa5, #00897b); }
+    .btn-cloud { background: linear-gradient(135deg, #ff9100, #ff6d00); }
+    .btn-action:disabled { opacity: 0.45; cursor: not-allowed; filter: grayscale(0.5); }
+
     .battle-log {
-      margin-top: 15px; background: #231130; color: #ffe6f2; padding: 12px;
-      border-radius: 12px; height: 120px; overflow-y: auto; font-size: 0.9rem;
+      margin-top: 15px; background: #1f0e2e; color: #ffe6f2; padding: 12px 16px;
+      border-radius: 14px; height: 125px; overflow-y: auto; font-size: 0.9rem;
+      border: 2px solid #4a256b; line-height: 1.5;
     }
 
     /* Grid Skin Karakter */
     .skin-grid {
-      display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 16px;
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(225px, 1fr)); gap: 16px;
     }
     .skin-card {
       background: white; border-radius: 16px; padding: 12px; text-align: center;
-      border: 3px solid #eee; transition: 0.2s; position: relative;
+      border: 3px solid #eee; transition: 0.25s; position: relative;
     }
+    .skin-card:hover { transform: translateY(-4px); box-shadow: 0 8px 16px rgba(0,0,0,0.1); }
     .skin-card.equipped { border-color: var(--pink-hot); background: #fff0f6; }
     .skin-card.locked { filter: grayscale(0.85); opacity: 0.75; }
-    .skin-card img { width: 100%; height: 220px; object-fit: cover; border-radius: 12px; }
+    .skin-card img { width: 100%; height: 225px; object-fit: cover; border-radius: 12px; }
     .role-tag {
       display: inline-block; padding: 3px 10px; border-radius: 10px; font-size: 0.75rem;
-      font-weight: 700; background: var(--purple-soft); color: var(--purple-dark); margin: 6px 0;
+      font-weight: 800; background: var(--purple-soft); color: var(--purple-dark); margin: 6px 0;
     }
 
     table { width: 100%; border-collapse: collapse; margin-top: 10px; }
     th, td { padding: 10px; border-bottom: 1px solid #ddd; text-align: left; }
     th { background: var(--pink-pastel); }
 
-    @media (max-width: 700px) {
+    @media (max-width: 750px) {
       .battle-arena { grid-template-columns: 1fr; }
     }
   </style>
@@ -109,9 +243,9 @@
 <body>
 
 <header>
-  <div class="brand">✨ Shayla & Shelly: Fashion Battle RPG</div>
+  <div class="brand">✨ Shayla & Shelly: Fashion Battle RPG v2.0</div>
   <div class="stats-bar">
-    <span class="badge" id="ui-user">👤 Guest</span>
+    <span class="badge" id="ui-user">👤 Player1</span>
     <span class="badge" id="ui-lv">⭐ Lv. 1</span>
     <span class="badge" id="ui-gems">💎 200 Gems</span>
     <span class="badge" id="ui-stage">🏰 Stage 1</span>
@@ -122,61 +256,77 @@
 <div class="container">
   <div class="tabs">
     <button class="tab-btn active" onclick="switchTab('battle', this)">⚔️ Battle Stage</button>
-    <button class="tab-btn" onclick="switchTab('wardrobe', this)">👗 Wardrobe & Party (9 Chibi)</button>
+    <button class="tab-btn" onclick="switchTab('wardrobe', this)">👗 Wardrobe & Kekuatan (9 Chibi)</button>
     <button class="tab-btn" onclick="switchTab('gacha', this)">🎰 Gacha Runway (100 💎)</button>
     <button class="tab-btn" onclick="switchTab('cloud', this)">🏆 Google Sheets & Ranking</button>
   </div>
 
   <!-- TAB 1: BATTLE -->
   <div id="tab-battle" class="panel active">
-    <div class="battle-arena">
+    <div class="battle-arena" id="battle-arena">
+      <div class="fx-layer" id="fx-layer"></div>
+      <div class="ult-banner" id="ult-banner">✨ ULTIMATE RUNWAY FINALE! ✨</div>
+
       <!-- Pemain -->
-      <div class="fighter-card">
-        <h3 id="p-name">Shayla (Mosaic Gown)</h3>
-        <img id="p-img" class="fighter-img" src="shayla_mosaic.jpg" alt="Hero"/>
+      <div class="fighter-card" id="p-card">
+        <h3 id="p-name" style="margin:0 0 6px;">Shayla - Mosaic Empress</h3>
+        <div class="sprite-wrap" id="p-sprite">
+          <img id="p-img" class="fighter-img" src="shayla_mosaic.jpg" alt="Hero"/>
+        </div>
+        <div class="status-badges" id="p-statuses"></div>
         <div class="hp-bar-wrap"><div id="p-hp-bar" class="hp-bar"></div></div>
-        <div id="p-hp-text">HP: 500 / 500</div>
-        <small id="p-skill-desc">Skill: Golden Mosaic Shield</small>
+        <div id="p-hp-text" style="font-weight:bold; font-size:0.9rem;">HP: 550 / 550</div>
+
+        <!-- Ultimate Energy Bar -->
+        <div class="hp-bar-wrap" style="height:12px; margin-top:6px;">
+          <div id="p-ult-bar" class="ult-bar"></div>
+        </div>
+        <small id="p-ult-text" style="color:#ffd54f; font-weight:bold;">⚡ Starlight Energy: 0%</small><br/>
+        <small id="p-skill-desc" style="opacity:0.9;">Kekuatan: Kristal Perisai Mosaik</small>
       </div>
 
       <!-- VS -->
       <div>
-        <h1 style="margin:0; font-size:2.4rem; color:#ffd54f;">VS</h1>
-        <p id="stage-label" style="font-weight:bold;">STAGE 1</p>
+        <h1 style="margin:0; font-size:2.6rem; color:#ffd54f; text-shadow:0 0 12px #ff4081;">VS</h1>
+        <p id="stage-label" style="font-weight:900; letter-spacing:1px;">STAGE 1</p>
       </div>
 
       <!-- Musuh -->
-      <div class="fighter-card">
-        <h3 id="e-name">Shadow Fashion Critic</h3>
-        <div style="font-size:5.5rem; line-height:220px;" id="e-avatar">👾</div>
+      <div class="fighter-card" id="e-card">
+        <h3 id="e-name" style="margin:0 0 6px;">Shadow Fashion Critic</h3>
+        <div class="sprite-wrap enemy-wrap" id="e-sprite">
+          <div style="font-size:6.2rem; line-height:235px; filter: drop-shadow(0 0 16px #ff1744);" id="e-avatar">👾</div>
+        </div>
+        <div class="status-badges" id="e-statuses"></div>
         <div class="hp-bar-wrap"><div id="e-hp-bar" class="hp-bar enemy-hp"></div></div>
-        <div id="e-hp-text">HP: 450 / 450</div>
-        <small id="e-desc">Monster pengacau panggung runway!</small>
+        <div id="e-hp-text" style="font-weight:bold; font-size:0.9rem;">HP: 450 / 450</div>
+        <small id="e-desc" style="opacity:0.85;">Monster pengacau panggung runway!</small>
       </div>
     </div>
 
     <div class="battle-controls">
-      <button class="btn-action btn-atk" id="btn-atk" onclick="playerAction('attack')">🗡️ Glam Strike (Basic)</button>
-      <button class="btn-action btn-skill" id="btn-skill" onclick="playerAction('skill')">✨ Signature Skill (CD: <span id="cd-skill">0</span>)</button>
+      <button class="btn-action btn-atk" id="btn-atk" onclick="playerAction('attack')">🗡️ Glam Strike</button>
+      <button class="btn-action btn-skill" id="btn-skill" onclick="playerAction('skill')">✨ <span id="lbl-skill">Elemental Skill</span> (CD: <span id="cd-skill">0</span>)</button>
+      <button class="btn-action btn-ult" id="btn-ult" onclick="playerAction('ult')" disabled>👑 Ultimate Finale (<span id="lbl-ult">0</span>%)</button>
       <button class="btn-action btn-heal" id="btn-heal" onclick="playerAction('heal')">💖 Touch-Up Heal (CD: <span id="cd-heal">0</span>)</button>
     </div>
 
     <div class="battle-log" id="battle-log">
-      <div>🎀 Selamat datang di panggung pertarungan! Pilih aksimu untuk mengalahkan musuh.</div>
+      <div>🎀 Pertarungan dimulai! Gunakan Glam Strike, Elemental Skill, atau kumpulkan 100% energi untuk mengeluarkan Ultimate!</div>
     </div>
   </div>
 
   <!-- TAB 2: WARDROBE -->
   <div id="tab-wardrobe" class="panel">
-    <h2>👗 Koleksi Karakter & Skin Chibi (Shayla & Shelly)</h2>
-    <p>Setiap kostum memberikan statistik HP, Attack, dan *Elemental Skill* yang berbeda di dalam pertarungan.</p>
+    <h2>👗 Koleksi Kostum & Kekuatan Elemen (Shayla & Shelly)</h2>
+    <p>Setiap kostum memiliki **Animasi Proyektil**, **Aura Warna**, dan **Efek Kekuatan (Shield / Stun / Burn / Lifesteal / Crit)** yang berbeda!</p>
     <div class="skin-grid" id="skin-grid"></div>
   </div>
 
   <!-- TAB 3: GACHA -->
   <div id="tab-gacha" class="panel" style="text-align:center;">
     <h2>🎰 Runway Starlight Gacha</h2>
-    <p>Gunakan <b>100 Pink Gems 💎</b> untuk memanggil kostum Chibi baru bagi Shayla atau membuka sang adik, Shelly!</p>
+    <p>Gunakan <b>100 Pink Gems 💎</b> untuk membuka kostum kekuatan baru bagi Shayla atau memanggil sang adik, Shelly!</p>
     <button class="btn-action btn-skill" style="font-size:1.2rem; padding:15px 30px;" onclick="pullGacha()">✨ Summon 1x (100 💎)</button>
     <div id="gacha-result" style="margin-top:25px;"></div>
   </div>
@@ -211,117 +361,173 @@
 
 <script>
   // =========================================================================
-  // 1. MASUKKAN URL WEB APP GOOGLE APPS SCRIPT KAMU DI BAWAH INI
+  // 1. URL WEB APP GOOGLE APPS SCRIPT KAMU
   // =========================================================================
   const GAS_URL = "https://script.google.com/macros/s/AKfycbzUCTjhIUp3WrObvszStoLSDPbk-FzBvaPhYv-szF94suu2GpCxqcm8CcPgOAMRSTMl/exec";
 
   // =========================================================================
-  // 2. DATABASE 9 KARAKTER / SKIN CHIBI SHAYLA & SHELLY
+  // 2. EFEK SUARA SYNTHESIZER OTOMATIS (TANPA PERLU FILE MP3)
+  // =========================================================================
+  const AudioCtx = window.AudioContext || window.webkitAudioContext;
+  let audioCtx = null;
+  function playSfx(type) {
+    try {
+      if (!audioCtx) audioCtx = new AudioCtx();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      const now = audioCtx.currentTime;
+      if (type === 'atk') {
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(320, now);
+        osc.frequency.exponentialRampToValueAtTime(110, now + 0.15);
+        gain.gain.setValueAtTime(0.25, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.15);
+        osc.start(now); osc.stop(now + 0.15);
+      } else if (type === 'skill') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(440, now);
+        osc.frequency.exponentialRampToValueAtTime(880, now + 0.35);
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.35);
+        osc.start(now); osc.stop(now + 0.35);
+      } else if (type === 'ult') {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(200, now);
+        osc.frequency.exponentialRampToValueAtTime(960, now + 0.6);
+        gain.gain.setValueAtTime(0.35, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.6);
+        osc.start(now); osc.stop(now + 0.6);
+      } else if (type === 'heal') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(523, now);
+        osc.frequency.setValueAtTime(659, now + 0.12);
+        osc.frequency.setValueAtTime(784, now + 0.24);
+        gain.gain.setValueAtTime(0.25, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.4);
+        osc.start(now); osc.stop(now + 0.4);
+      }
+    } catch (e) {}
+  }
+
+  // =========================================================================
+  // 3. DATABASE 9 KARAKTER BESERTA ANIMASI & EFEK KEKUATAN UNIKNYA
   // =========================================================================
   const SKINS_DB = [
     {
       id: "shayla_mosaic",
       name: "Shayla - Mosaic Empress",
-      char: "Shayla",
       img: "shayla_mosaic.jpg",
-      role: "Light Tank / Buffer",
-      hp: 550, atk: 65,
+      role: "Prism Shielder (Light)",
+      hp: 560, atk: 68,
       skillName: "Prism Mosaic Nova",
-      skillMult: 2.1,
-      bonusHeal: 120
+      ultName: "Diamond Cathedral Judgment",
+      skillMult: 2.1, bonusHeal: 130,
+      projIcon: "💎", partIcons: ["💎", "✨", "🌟"], auraColor: "#ffd700",
+      effectType: "shield", effectDesc: "Menciptakan Perisai Kristal (+140 Shield)"
     },
     {
       id: "shayla_gold",
       name: "Shayla - Golden Chain Goddess",
-      char: "Shayla",
       img: "shayla_gold.jpg",
-      role: "Golden Bruiser",
-      hp: 520, atk: 80,
+      role: "Chain Controller (Metal)",
+      hp: 530, atk: 82,
       skillName: "Golden Chain Bind",
-      skillMult: 2.4,
-      bonusHeal: 90
+      ultName: "Empress Chain Prison",
+      skillMult: 2.3, bonusHeal: 100,
+      projIcon: "⛓️", partIcons: ["⛓️", "🪙", "✨"], auraColor: "#ffab00",
+      effectType: "stun", effectDesc: "Mengikat & Stun Musuh selama 1 Giliran"
     },
     {
       id: "shayla_yellow",
       name: "Shayla - Sunburst Corset",
-      char: "Shayla",
       img: "shayla_yellow.jpg",
-      role: "Solar Striker",
-      hp: 480, atk: 90,
+      role: "Solar Mage (Sun/Fire)",
+      hp: 490, atk: 92,
       skillName: "Sunbeam Ribbon Slash",
-      skillMult: 2.5,
-      bonusHeal: 85
+      ultName: "Supernova Runway Flare",
+      skillMult: 2.4, bonusHeal: 95,
+      projIcon: "☀️", partIcons: ["☀️", "🔥", "✨"], auraColor: "#ffea00",
+      effectType: "burn", effectDesc: "Membakar Musuh (Burn Damage 3 Giliran)"
     },
     {
       id: "shayla_ocean",
       name: "Shayla - Ocean Pearl Siren",
-      char: "Shayla",
       img: "shayla_ocean.jpg",
-      role: "Hydro Healer",
-      hp: 620, atk: 70,
-      skillName: "Tidal Pearl Blessing",
-      skillMult: 2.0,
-      bonusHeal: 220
+      role: "Hydro Healer (Water)",
+      hp: 640, atk: 75,
+      skillName: "Tidal Pearl Vortex",
+      ultName: "Atlantis Tsunami Encore",
+      skillMult: 2.0, bonusHeal: 240,
+      projIcon: "🌊", partIcons: ["🫧", "🐚", "💧"], auraColor: "#00e5ff",
+      effectType: "regen", effectDesc: "Menyerang sambil Memulihkan +150 HP"
     },
     {
       id: "shayla_pop",
       name: "Shayla - Pink Fur Pop Diva",
-      char: "Shayla",
       img: "shayla_pop.jpg",
-      role: "Sonic Charmer",
-      hp: 500, atk: 95,
-      skillName: "Pink Spotlight Encore",
-      skillMult: 2.6,
-      bonusHeal: 110
+      role: "Sonic Enchanter (Sound)",
+      hp: 510, atk: 98,
+      skillName: "Pink Spotlight Bassdrop",
+      ultName: "World Tour Megastar Finale",
+      skillMult: 2.5, bonusHeal: 120,
+      projIcon: "🎤", partIcons: ["🎵", "💖", "🎶"], auraColor: "#ff4081",
+      effectType: "atk_up", effectDesc: "Meningkatkan Attack Diri +35% (3 Giliran)"
     },
     {
       id: "shayla_biker",
       name: "Shayla - Crimson Rebel Biker",
-      char: "Shayla",
       img: "shayla_biker.jpg",
-      role: "Critical Assassin",
-      hp: 460, atk: 115,
+      role: "Lethal Assassin (Flame)",
+      hp: 470, atk: 118,
       skillName: "Crimson Leather Blitz",
-      skillMult: 2.9,
-      bonusHeal: 70
+      ultName: "Full Throttle Redline",
+      skillMult: 2.9, bonusHeal: 80,
+      projIcon: "🔥", partIcons: ["💥", "🔥", "⚡"], auraColor: "#ff1744",
+      effectType: "crit", effectDesc: "Pasti Critical Hit (Damage Berlipat Ganda)"
     },
     {
       id: "shayla_galaxy",
       name: "Shayla - Starlight Nebula",
-      char: "Shayla",
       img: "shayla_galaxy.jpg",
-      role: "Cosmic Mage",
-      hp: 510, atk: 110,
+      role: "Cosmic Sorceress (Galaxy)",
+      hp: 520, atk: 112,
       skillName: "Nebula Sequins Meteor",
-      skillMult: 2.8,
-      bonusHeal: 100
+      ultName: "Big Bang Runway Collapse",
+      skillMult: 2.7, bonusHeal: 110,
+      projIcon: "☄️", partIcons: ["🪐", "🌌", "⭐"], auraColor: "#7c4dff",
+      effectType: "weaken", effectDesc: "Melemahkan Attack Musuh -40% (2 Giliran)"
     },
     {
       id: "shayla_royal",
       name: "Shayla - Sovereign Lace Queen",
-      char: "Shayla",
       img: "shayla_royal.jpg",
-      role: "Royal Paladin",
-      hp: 680, atk: 105,
+      role: "Royal Paladin (Nature/Gold)",
+      hp: 690, atk: 108,
       skillName: "Emerald Leaf Judgment",
-      skillMult: 2.7,
-      bonusHeal: 160
+      ultName: "Royal Coronation Sanctuary",
+      skillMult: 2.6, bonusHeal: 175,
+      projIcon: "🌿", partIcons: ["🍃", "👑", "✨"], auraColor: "#00e676",
+      effectType: "shield_heal", effectDesc: "Memberi +120 Shield & +120 HP Sekaligus"
     },
     {
       id: "shelly_purple",
       name: "Shelly - Amethyst Night Princess",
-      char: "Shelly (Adik Shayla)",
       img: "shelly_purple.jpg",
       role: "Dark Archmage (SSR)",
-      hp: 640, atk: 130,
+      hp: 650, atk: 135,
       skillName: "Violet Ruffle Apocalypse",
-      skillMult: 3.2,
-      bonusHeal: 150
+      ultName: "Abyssal Midnight Requiem",
+      skillMult: 3.1, bonusHeal: 160,
+      projIcon: "🔮", partIcons: ["🔮", "🦋", "💜"], auraColor: "#d500f9",
+      effectType: "lifesteal", effectDesc: "Menyedot 50% Damage Menjadi HP (Vampiric)"
     }
   ];
 
   // =========================================================================
-  // 3. STATE PEMAIN & PERTARUNGAN
+  // 4. STATE PEMAIN & PERTARUNGAN
   // =========================================================================
   let player = {
     username: localStorage.getItem("rpg_username") || "Player1",
@@ -333,16 +539,16 @@
   };
 
   let battle = {
-    pMaxHp: 500, pHp: 500,
-    eMaxHp: 450, eHp: 450, eAtk: 45,
-    cdSkill: 0, cdHeal: 0
+    pMaxHp: 550, pHp: 550, pShield: 0, pUlt: 0, pAtkBuff: 0,
+    eMaxHp: 450, eHp: 450, eAtk: 45, eStun: 0, eBurn: 0, eWeaken: 0,
+    cdSkill: 0, cdHeal: 0, busy: false
   };
 
   const ENEMIES = [
-    { name: "Shadow Fashion Critic", icon: "👾" },
-    { name: "Glitch Runway Golem", icon: "🤖" },
-    { name: "Neon Envy Witch", icon: "🧙‍♀️" },
-    { name: "Dark Couture Dragon", icon: "🐉" }
+    { name: "Shadow Fashion Critic", icon: "👾", proj: "🌑" },
+    { name: "Glitch Runway Golem", icon: "🤖", proj: "⚙️" },
+    { name: "Neon Envy Witch", icon: "🧙‍♀️", proj: "🧪" },
+    { name: "Dark Couture Dragon", icon: "🐉", proj: "☄️" }
   ];
 
   function initGame() {
@@ -375,39 +581,130 @@
 
   function setupStage() {
     const skin = getActiveSkin();
-    const lvBonus = (player.level - 1) * 25;
+    const lvBonus = (player.level - 1) * 30;
     battle.pMaxHp = skin.hp + lvBonus;
     battle.pHp = battle.pMaxHp;
+    battle.pShield = 0;
+    battle.pUlt = 0;
+    battle.pAtkBuff = 0;
     battle.cdSkill = 0;
     battle.cdHeal = 0;
+    battle.busy = false;
 
     const stg = player.maxStage;
     const enemyInfo = ENEMIES[(stg - 1) % ENEMIES.length];
-    battle.eMaxHp = 350 + (stg * 140);
+    battle.eMaxHp = 380 + (stg * 145);
     battle.eHp = battle.eMaxHp;
-    battle.eAtk = 35 + (stg * 14);
+    battle.eAtk = 38 + (stg * 14);
+    battle.eStun = 0;
+    battle.eBurn = 0;
+    battle.eWeaken = 0;
 
+    const pImg = document.getElementById("p-img");
+    pImg.src = skin.img;
+    pImg.style.boxShadow = `0 0 22px ${skin.auraColor}`;
     document.getElementById("p-name").innerText = skin.name;
-    document.getElementById("p-img").src = skin.img;
-    document.getElementById("p-skill-desc").innerText = `Skill: ${skin.skillName} (${skin.role})`;
+    document.getElementById("lbl-skill").innerText = skin.skillName;
+    document.getElementById("p-skill-desc").innerText = `⚡ Efek Skill: ${skin.effectDesc}`;
     document.getElementById("stage-label").innerText = `STAGE ${stg}`;
     document.getElementById("e-name").innerText = `${enemyInfo.name} (Lv.${stg})`;
     document.getElementById("e-avatar").innerText = enemyInfo.icon;
 
-    updateBattleBars();
+    updateBattleUI();
   }
 
-  function updateBattleBars() {
+  // =========================================================================
+  // 5. SISTEM ANIMASI VISUAL (PROYEKTIL, PARTIKEL, POPUP DAMAGE)
+  // =========================================================================
+  function triggerAnim(elId, animClass) {
+    const el = document.getElementById(elId);
+    el.classList.remove(animClass);
+    void el.offsetWidth;
+    el.classList.add(animClass);
+    setTimeout(() => el.classList.remove(animClass), 650);
+  }
+
+  function spawnProjectile(icon, toEnemy = true) {
+    const layer = document.getElementById("fx-layer");
+    const proj = document.createElement("div");
+    proj.className = toEnemy ? "projectile" : "enemy-projectile";
+    proj.innerText = icon;
+    layer.appendChild(proj);
+    setTimeout(() => proj.remove(), 580);
+  }
+
+  function spawnParticleBurst(icons, targetSide = 'enemy') {
+    const layer = document.getElementById("fx-layer");
+    const centerX = targetSide === 'enemy' ? 76 : 24;
+    for (let i = 0; i < 12; i++) {
+      const p = document.createElement("div");
+      p.className = "particle-burst";
+      p.innerText = icons[i % icons.length];
+      p.style.left = centerX + "%";
+      p.style.top = "42%";
+      const angle = (Math.PI * 2 * i) / 12;
+      const dist = 60 + Math.random() * 70;
+      p.style.setProperty("--tx", `${Math.cos(angle) * dist}px`);
+      p.style.setProperty("--ty", `${Math.sin(angle) * dist}px`);
+      layer.appendChild(p);
+      setTimeout(() => p.remove(), 750);
+    }
+  }
+
+  function showFloatingText(text, targetSide = 'enemy', color = '#ffeb3b') {
+    const layer = document.getElementById("fx-layer");
+    const pop = document.createElement("div");
+    pop.className = "dmg-popup";
+    pop.style.left = targetSide === 'enemy' ? "76%" : "24%";
+    pop.style.top = "32%";
+    pop.style.color = color;
+    pop.innerHTML = text;
+    layer.appendChild(pop);
+    setTimeout(() => pop.remove(), 1000);
+  }
+
+  function playUltimateCutIn(title) {
+    const banner = document.getElementById("ult-banner");
+    banner.innerText = `👑 ${title} 👑`;
+    banner.classList.remove("play");
+    void banner.offsetWidth;
+    banner.classList.add("play");
+    triggerAnim("battle-arena", "screen-shake");
+  }
+
+  function updateBattleUI() {
     const pPct = Math.max(0, (battle.pHp / battle.pMaxHp) * 100);
     const ePct = Math.max(0, (battle.eHp / battle.eMaxHp) * 100);
     document.getElementById("p-hp-bar").style.width = pPct + "%";
     document.getElementById("e-hp-bar").style.width = ePct + "%";
-    document.getElementById("p-hp-text").innerText = `HP: ${battle.pHp} / ${battle.pMaxHp}`;
+
+    const shieldTxt = battle.pShield > 0 ? ` (+🛡️${battle.pShield})` : "";
+    document.getElementById("p-hp-text").innerText = `HP: ${battle.pHp} / ${battle.pMaxHp}${shieldTxt}`;
     document.getElementById("e-hp-text").innerText = `HP: ${battle.eHp} / ${battle.eMaxHp}`;
+
+    document.getElementById("p-ult-bar").style.width = battle.pUlt + "%";
+    document.getElementById("p-ult-text").innerText = `⚡ Starlight Energy: ${battle.pUlt}%`;
+    document.getElementById("lbl-ult").innerText = battle.pUlt;
+
     document.getElementById("cd-skill").innerText = battle.cdSkill;
     document.getElementById("cd-heal").innerText = battle.cdHeal;
-    document.getElementById("btn-skill").disabled = battle.cdSkill > 0;
-    document.getElementById("btn-heal").disabled = battle.cdHeal > 0;
+
+    document.getElementById("btn-atk").disabled = battle.busy;
+    document.getElementById("btn-skill").disabled = battle.busy || battle.cdSkill > 0;
+    document.getElementById("btn-ult").disabled = battle.busy || battle.pUlt < 100;
+    document.getElementById("btn-heal").disabled = battle.busy || battle.cdHeal > 0;
+
+    // Render Status Badges
+    const pStat = document.getElementById("p-statuses");
+    pStat.innerHTML = "";
+    if (battle.pShield > 0) pStat.innerHTML += `<span class="status-pill">🛡️ Shield ${battle.pShield}</span>`;
+    if (battle.pAtkBuff > 0) pStat.innerHTML += `<span class="status-pill">🎤 ATK +35% (${battle.pAtkBuff})</span>`;
+
+    const eStat = document.getElementById("e-statuses");
+    eStat.innerHTML = "";
+    if (battle.eStun > 0) eStat.innerHTML += `<span class="status-pill">⛓️ STUNNED (${battle.eStun})</span>`;
+    if (battle.eBurn > 0) eStat.innerHTML += `<span class="status-pill">🔥 BURN (${battle.eBurn})</span>`;
+    if (battle.eWeaken > 0) eStat.innerHTML += `<span class="status-pill">🪐 WEAK -40% (${battle.eWeaken})</span>`;
   }
 
   function logBattle(msg) {
@@ -415,56 +712,214 @@
     box.innerHTML = `<div>${msg}</div>` + box.innerHTML;
   }
 
+  // =========================================================================
+  // 6. LOGIKA AKSI PERTARUNGAN & KEKUATAN UNIK TIAP KOSTUM
+  // =========================================================================
   function playerAction(type) {
+    if (battle.busy) return;
+    battle.busy = true;
     const skin = getActiveSkin();
-    const baseAtk = skin.atk + (player.level * 8);
+    let baseAtk = skin.atk + (player.level * 9);
+    if (battle.pAtkBuff > 0) baseAtk = Math.floor(baseAtk * 1.35);
 
     if (type === 'attack') {
-      const dmg = Math.floor(baseAtk * (0.9 + Math.random() * 0.2));
-      battle.eHp -= dmg;
-      logBattle(`🗡️ <b>${skin.name}</b> menyerang dengan Glam Strike sebesar <b>${dmg} DMG</b>!`);
-    } else if (type === 'skill' && battle.cdSkill === 0) {
-      const dmg = Math.floor(baseAtk * skin.skillMult);
-      battle.eHp -= dmg;
-      battle.cdSkill = 3;
-      logBattle(`✨ <b>${skin.skillName}!</b> Serangan memukau menghantam musuh sebesar <b>${dmg} DMG</b>!`);
-    } else if (type === 'heal' && battle.cdHeal === 0) {
-      const healAmt = skin.bonusHeal + (player.level * 15);
+      playSfx('atk');
+      triggerAnim("p-sprite", "anim-dash-right");
+      spawnProjectile(skin.projIcon, true);
+
+      setTimeout(() => {
+        const dmg = Math.floor(baseAtk * (0.95 + Math.random() * 0.2));
+        battle.eHp = Math.max(0, battle.eHp - dmg);
+        battle.pUlt = Math.min(100, battle.pUlt + 25);
+
+        triggerAnim("e-sprite", "anim-hit");
+        spawnParticleBurst(skin.partIcons, 'enemy');
+        showFloatingText(`-${dmg}`, 'enemy', '#ffeb3b');
+        logBattle(`🗡️ <b>${skin.name}</b> menerjang dan menembakkan ${skin.projIcon} sebesar <b>${dmg} DMG</b>!`);
+        afterPlayerTurn();
+      }, 450);
+
+    } else if (type === 'skill') {
+      playSfx('skill');
+      triggerAnim("p-sprite", "anim-cast");
+      spawnProjectile(skin.projIcon, true);
+
+      setTimeout(() => {
+        let dmg = Math.floor(baseAtk * skin.skillMult);
+        battle.cdSkill = 3;
+        battle.pUlt = Math.min(100, battle.pUlt + 40);
+
+        // Terapkan Efek Khusus Masing-Masing Skin
+        let fxText = "";
+        if (skin.effectType === "shield") {
+          battle.pShield += 140;
+          fxText = " + 🛡️140 Kristal Shield!";
+          showFloatingText("+🛡️140 Shield", "player", "#00e5ff");
+        } else if (skin.effectType === "stun") {
+          battle.eStun = 1;
+          fxText = " + ⛓️Musuh Terikat (Stun 1 Giliran)!";
+        } else if (skin.effectType === "burn") {
+          battle.eBurn = 3;
+          fxText = " + 🔥Musuh Terbakar (3 Giliran)!";
+        } else if (skin.effectType === "regen") {
+          battle.pHp = Math.min(battle.pMaxHp, battle.pHp + 150);
+          fxText = " + 💧Memulihkan 150 HP!";
+          showFloatingText("+150 HP", "player", "#69f0ae");
+        } else if (skin.effectType === "atk_up") {
+          battle.pAtkBuff = 3;
+          fxText = " + 🎤Buff Attack +35%!";
+          showFloatingText("ATK UP!", "player", "#ff4081");
+        } else if (skin.effectType === "crit") {
+          dmg = Math.floor(dmg * 1.45);
+          fxText = " (💥CRITICAL HIT!)";
+        } else if (skin.effectType === "weaken") {
+          battle.eWeaken = 2;
+          fxText = " + 🪐Attack Musuh Melemah -40%!";
+        } else if (skin.effectType === "shield_heal") {
+          battle.pShield += 120;
+          battle.pHp = Math.min(battle.pMaxHp, battle.pHp + 120);
+          fxText = " + 👑120 Shield & 120 HP!";
+          showFloatingText("+120 HP/Shield", "player", "#00e676");
+        } else if (skin.effectType === "lifesteal") {
+          const stolen = Math.floor(dmg * 0.5);
+          battle.pHp = Math.min(battle.pMaxHp, battle.pHp + stolen);
+          fxText = ` + 🔮Lifesteal +${stolen} HP!`;
+          showFloatingText(`+${stolen} HP`, "player", "#e040fb");
+        }
+
+        battle.eHp = Math.max(0, battle.eHp - dmg);
+        triggerAnim("e-sprite", "anim-hit");
+        triggerAnim("battle-arena", "screen-shake");
+        spawnParticleBurst(skin.partIcons, 'enemy');
+        showFloatingText(`✨ -${dmg}`, 'enemy', '#ff4081');
+
+        logBattle(`✨ <b>${skin.skillName}!</b> Menghantam musuh sebesar <b>${dmg} DMG</b>${fxText}`);
+        afterPlayerTurn();
+      }, 500);
+
+    } else if (type === 'ult') {
+      playSfx('ult');
+      playUltimateCutIn(skin.ultName);
+      triggerAnim("p-sprite", "anim-cast");
+      spawnProjectile(skin.projIcon, true);
+
+      setTimeout(() => {
+        const dmg = Math.floor(baseAtk * (skin.skillMult + 1.6));
+        battle.pUlt = 0;
+        battle.pShield += 100;
+        battle.eHp = Math.max(0, battle.eHp - dmg);
+
+        triggerAnim("e-sprite", "anim-hit");
+        spawnParticleBurst(skin.partIcons, 'enemy');
+        spawnParticleBurst(["🌟", "💥", "👑"], 'enemy');
+        showFloatingText(`👑 ULTIMATE -${dmg}!`, 'enemy', '#ffd700');
+
+        logBattle(`👑 <b>ULTIMATE: ${skin.ultName}!</b> Ledakan kekuatan penuh menghancurkan musuh sebesar <b>${dmg} DMG</b> (+🛡️100 Shield)!`);
+        afterPlayerTurn();
+      }, 650);
+
+    } else if (type === 'heal') {
+      playSfx('heal');
+      triggerAnim("p-sprite", "anim-cast");
+      const healAmt = skin.bonusHeal + (player.level * 18);
       battle.pHp = Math.min(battle.pMaxHp, battle.pHp + healAmt);
       battle.cdHeal = 3;
-      logBattle(`💖 <b>Touch-Up Heal!</b> Memulihkan <b>${healAmt} HP</b>.`);
+      battle.pUlt = Math.min(100, battle.pUlt + 20);
+
+      spawnParticleBurst(["💖", "✨", "🌸"], 'player');
+      showFloatingText(`+${healAmt} HP`, 'player', '#00e676');
+      logBattle(`💖 <b>Touch-Up Heal!</b> Shayla/Shelly memulihkan <b>+${healAmt} HP</b>.`);
+      setTimeout(afterPlayerTurn, 450);
+    }
+  }
+
+  function afterPlayerTurn() {
+    if (battle.cdSkill > 0) battle.cdSkill--;
+    if (battle.cdHeal > 0) battle.cdHeal--;
+    if (battle.pAtkBuff > 0) battle.pAtkBuff--;
+
+    updateBattleUI();
+
+    // Cek apabila musuh terkena Burn
+    if (battle.eHp > 0 && battle.eBurn > 0) {
+      const burnDmg = Math.floor(battle.eMaxHp * 0.08);
+      battle.eHp = Math.max(0, battle.eHp - burnDmg);
+      battle.eBurn--;
+      showFloatingText(`🔥 -${burnDmg}`, 'enemy', '#ff9100');
+      logBattle(`🔥 Efek <b>Solar Burn</b> membakar musuh sebesar <b>${burnDmg} DMG</b>!`);
+      updateBattleUI();
     }
 
-    if (battle.cdSkill > 0 && type !== 'skill') battle.cdSkill--;
-    if (battle.cdHeal > 0 && type !== 'heal') battle.cdHeal--;
-
+    // Cek kemenangan
     if (battle.eHp <= 0) {
-      const rewardGems = 60 + (player.maxStage * 15);
+      const rewardGems = 70 + (player.maxStage * 15);
       player.gems += rewardGems;
       player.level += 1;
       player.maxStage += 1;
-      logBattle(`🎉 <b>MENANG!</b> Kamu naik ke Lv.${player.level} dan mendapat <b>+${rewardGems} Gems 💎</b>! Lanjut ke Stage ${player.maxStage}.`);
+      logBattle(`🎉 <b>STAGE CLEAR!</b> Naik ke Lv.${player.level} & dapat <b>+${rewardGems} Gems 💎</b>!`);
       saveLocal();
-      setTimeout(setupStage, 800);
+      setTimeout(setupStage, 1100);
       return;
     }
 
     // Giliran Musuh
-    const eDmg = Math.floor(battle.eAtk * (0.85 + Math.random() * 0.3));
-    battle.pHp -= eDmg;
-    logBattle(`👾 Musuh membalas serangan sebesar <b>${eDmg} DMG</b>!`);
+    setTimeout(enemyTurn, 650);
+  }
 
-    if (battle.pHp <= 0) {
-      logBattle(`💫 Kamu kalah di Stage ${player.maxStage}... Darah dipulihkan kembali untuk mencoba lagi!`);
-      setupStage();
+  function enemyTurn() {
+    if (battle.eStun > 0) {
+      battle.eStun--;
+      showFloatingText("⛓️ STUNNED!", "enemy", "#ffd54f");
+      logBattle(`⛓️ Musuh terikat rantai emas dan tidak bisa bergerak giliran ini!`);
+      battle.busy = false;
+      updateBattleUI();
       return;
     }
 
-    updateBattleBars();
+    const stg = player.maxStage;
+    const enemyInfo = ENEMIES[(stg - 1) % ENEMIES.length];
+    playSfx('atk');
+    triggerAnim("e-sprite", "anim-dash-left");
+    spawnProjectile(enemyInfo.proj, false);
+
+    setTimeout(() => {
+      let eDmg = Math.floor(battle.eAtk * (0.9 + Math.random() * 0.25));
+      if (battle.eWeaken > 0) {
+        eDmg = Math.floor(eDmg * 0.6);
+        battle.eWeaken--;
+      }
+
+      // Serap ke Shield dulu jika ada
+      if (battle.pShield > 0) {
+        if (battle.pShield >= eDmg) {
+          battle.pShield -= eDmg;
+          eDmg = 0;
+        } else {
+          eDmg -= battle.pShield;
+          battle.pShield = 0;
+        }
+      }
+
+      battle.pHp = Math.max(0, battle.pHp - eDmg);
+      battle.pUlt = Math.min(100, battle.pUlt + 15);
+
+      triggerAnim("p-sprite", "anim-hit");
+      showFloatingText(eDmg > 0 ? `-${eDmg}` : `🛡️ BLOCKED!`, 'player', '#ff5252');
+      logBattle(`👾 <b>${enemyInfo.name}</b> menyerang balik sebesar <b>${eDmg} DMG</b>!`);
+
+      if (battle.pHp <= 0) {
+        logBattle(`💫 Kamu kalah di Stage ${player.maxStage}... Energi dipulihkan untuk mencoba lagi!`);
+        setTimeout(setupStage, 1000);
+        return;
+      }
+
+      battle.busy = false;
+      updateBattleUI();
+    }, 450);
   }
 
   // =========================================================================
-  // 4. WARDROBE & GACHA SYSTEM
+  // 7. WARDROBE & GACHA SYSTEM
   // =========================================================================
   function renderWardrobe() {
     const grid = document.getElementById("skin-grid");
@@ -478,15 +933,16 @@
         <img src="${s.img}" alt="${s.name}" />
         <h4 style="margin:8px 0 4px;">${s.name}</h4>
         <span class="role-tag">${s.role}</span>
-        <div style="font-size:0.85rem; margin-bottom:10px;">
-          ❤️ HP: ${s.hp} | ⚔️ ATK: ${s.atk}<br/>
-          ✨ <i>${s.skillName}</i>
+        <div style="font-size:0.82rem; margin-bottom:10px; line-height:1.4;">
+          ❤️ HP: <b>${s.hp}</b> | ⚔️ ATK: <b>${s.atk}</b><br/>
+          ${s.projIcon} <b>${s.skillName}</b><br/>
+          <span style="color:#d81b60;">${s.effectDesc}</span>
         </div>
         ${unlocked
           ? `<button class="btn-action ${equipped ? 'btn-heal' : 'btn-atk'}" style="width:100%;" onclick="equipSkin('${s.id}')">
-              ${equipped ? '✅ Sedang Dipakai' : '👗 Pakai Kostum'}
+              ${equipped ? '✅ Sedang Dipakai' : '👗 Pakai Karakter'}
              </button>`
-          : `<button class="btn-action" style="width:100%; background:#888;" disabled>🔒 Belum Terbuka (Gacha)</button>`
+          : `<button class="btn-action" style="width:100%; background:#888;" disabled>🔒 Buka lewat Gacha</button>`
         }
       `;
       grid.appendChild(card);
@@ -505,16 +961,17 @@
       alert("Pink Gems kamu belum cukup! Menangkan Battle Stage untuk dapat Gems.");
       return;
     }
+    playSfx('ult');
     player.gems -= 100;
     const picked = SKINS_DB[Math.floor(Math.random() * SKINS_DB.length)];
     let msg = "";
 
     if (!player.unlockedSkins.includes(picked.id)) {
       player.unlockedSkins.push(picked.id);
-      msg = `🎉 <b>NEW CHARACTER/SKIN UNLOCKED!</b> Kamu mendapatkan <b>${picked.name}</b>!`;
+      msg = `🎉 <b>KARAKTER / KOSTUM BARU TERBUKA!</b> Kamu mendapatkan <b>${picked.name}</b> (${picked.effectDesc})!`;
     } else {
       player.level += 1;
-      msg = `✨ Kamu mendapat duplikat <b>${picked.name}</b>! Otomatis dikonversi menjadi <b>+1 Level Up (Lv.${player.level})</b>!`;
+      msg = `✨ Duplikat <b>${picked.name}</b>! Otomatis meningkatkan kekuatanmu menjadi <b>Lv.${player.level}</b>!`;
     }
 
     saveLocal();
@@ -522,16 +979,16 @@
     setupStage();
 
     document.getElementById("gacha-result").innerHTML = `
-      <div style="background:white; display:inline-block; padding:20px; border-radius:18px; border:3px solid var(--pink-hot);">
-        <img src="${picked.img}" style="width:180px; height:240px; object-fit:cover; border-radius:12px;" />
-        <h3>${picked.name}</h3>
+      <div style="background:white; display:inline-block; padding:20px; border-radius:18px; border:4px solid ${picked.auraColor}; box-shadow:0 0 25px ${picked.auraColor};">
+        <img src="${picked.img}" style="width:185px; height:245px; object-fit:cover; border-radius:12px;" />
+        <h3>${picked.projIcon} ${picked.name}</h3>
         <p>${msg}</p>
       </div>
     `;
   }
 
   // =========================================================================
-  // 5. INTEGRASI GOOGLE SHEETS (SAVE, LOAD, LEADERBOARD)
+  // 8. INTEGRASI GOOGLE SHEETS
   // =========================================================================
   function getTotalPower() {
     return (player.level * 150) + (player.unlockedSkins.length * 300);
@@ -593,7 +1050,7 @@
         setupStage();
         statusEl.innerText = `✅ Data akun ${player.username} berhasil dimuat!`;
       } else {
-        statusEl.innerText = "⚠️ Username belum ditemukan di Google Sheets. Silakan klik Save Data terlebih dahulu.";
+        statusEl.innerText = "⚠️ Username belum ditemukan di Google Sheets.";
       }
     } catch (err) {
       statusEl.innerText = "❌ Gagal memuat data: " + err;
